@@ -4,8 +4,8 @@ This is a mini-project in some data analysis and curve fitting to some anonymous
 
 ## Running the script
 
-To run the script, download the .xlsx and and .py files and change to this directory in the terminal/command line. To run the script in iPython, enter either "ipython decline_curve.py" or run in iPython using the "%run" magic command. To tweak the current input well options see the bottom 
-of decline_curve.py. Wellnames vary between "P001" to "P754" for the historical data and "P001" to "P020" for the forecast data. For the best plot quality figures should be maximised.
+Download the .xlsx and and .py files and change to this directory in the terminal/command line. To run the script in iPython, enter either "ipython decline_curve.py" or run in iPython using the "%run" magic command. To tweak the current input well options see the bottom 
+of decline_curve.py. Wellnames vary between "P001" to "P754" for the historical data and "P001" to "P020" for the forecast data. For the best plot quality figures should be maximised. Due to the size of the dataset, the script may take a couple of minutes to run.
 
 ### Prerequisites
 
