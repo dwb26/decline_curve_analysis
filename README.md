@@ -15,7 +15,7 @@ To run the script the latest installs of Python3, numpy, pandas, seaborn, scipy 
 ```
 pip install numpy
 ```
-in the terminal/command line.
+in the terminal/command line. Some additional packages my also require installing for reading the excel spreadsheet with Python. These can also be downloaded using pip.
 
 ## Authors
 
