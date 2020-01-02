@@ -10,11 +10,12 @@ of decline_curve.py. Wellnames vary between "P001" to "P754" for the historical 
 
 ### Prerequisites
 
-To run the script the latest installs of Python3, numpy, pandas, seaborn, scipy and matplotlib are recommended. These can be downloaded using pip and then, for example,
+To run the script the latest installs of Python3, numpy, pandas, seaborn, scipy and matplotlib are recommended. These can be downloaded by first downloading pip and then running, for example,
 
 ```
 pip install numpy
 ```
+in the terminal/command line.
 
 ## Authors
 
