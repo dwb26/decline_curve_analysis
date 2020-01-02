@@ -1,6 +1,8 @@
 """
-The purpose of this code is to implement a model that predicts the the predicts
-the production of fluid (oil and gas) WRITE OWN DESCRIPTION HERE.
+This code is an implementation of using Arp's decline currve as a means of
+fitting a curve to some historical well output quantities. Some forecast
+data is then used to predict the ultimate recoverable volume from the 
+input wellnames.
 """
 
 import pandas as pd
@@ -18,9 +20,6 @@ register_matplotlib_converters()
 ################
 df = pd.read_excel("data_prod.xlsx", sheet_name='PROD_HISTORY')
 df_fore = pd.read_excel("data_prod.xlsx", sheet_name='PROD_FORECAST')
-# x_train = df.values
-# print(df.head)
-# print(df.tail)
 
 
 ##################
@@ -36,7 +35,7 @@ def group_wells(wellnames=None):
 	output = ['Gas Prod', 'Oil Prod', 'Water Prod', 'Tubing Pressure', \
 	'Casing Pressure', 'Choke Size']
 
-	#### If wellnames == None, extract and plot the grouped dataframe of \
+	#### If wellnames == None, extract and plot the grouped dataframe of
 	#### aggregate output for all of the wellnames.
 	if wellnames == None:
 		
@@ -51,7 +50,6 @@ def group_wells(wellnames=None):
 		ax.set_xlabel(xlabel='Well allias', fontdict={'fontsize': 12})
 		ax.set_ylabel(ylabel='Output', fontdict={'fontsize': 12})
 		ax.set_title('Well allias aggregate output', fontdict={'fontsize': 14})
-		# plt.show()
 		return grouped
 
 	#### Extract and plot the grouped dataframe of aggregate output for all of
@@ -68,7 +66,6 @@ def group_wells(wellnames=None):
 	ax.set_xlabel(xlabel='Well allias', fontdict={'fontsize': 12})
 	ax.set_ylabel(ylabel='Output', fontdict={'fontsize': 12})
 	ax.set_title('Well allias aggregate output', fontdict={'fontsize': 14})
-	# plt.show()
 	return hist
 
 def monthly_prod(hist):
@@ -79,7 +76,6 @@ def monthly_prod(hist):
 	"""
 
 	# Preliminaries
-	# fig = plt.figure()
 	ax1 = plt.subplot(211)
 	ax2 = plt.subplot(212)
 	fig2.subplots_adjust(hspace=.35)
@@ -113,7 +109,6 @@ def monthly_prod(hist):
 	ax2.set_title('Original daily time series aggregate output', \
 		fontdict={'fontsize': 12})
 	ax2.set_xlabel('Time (years)', fontdict={'fontsize': 12})
-	# plt.show()
 	return monthly
 
 
@@ -234,8 +229,6 @@ def plot_curves(wellnames=None):
 			axs[0, i].set_title('Grouped ' + output[i] + \
 				' (top) and error (below) vs. time', fontdict={'fontsize': 11})
 	return fig3
-	# plt.show()
-
 
 def cumul_time(wellnames):
     
@@ -258,13 +251,15 @@ def cumul_time(wellnames):
     
     # Extract the historical and forecast dataframes for the input wellnames.
     well_hist_df = df.loc[df['Well_allias'].isin(wellnames)].set_index('Well_allias')
-    well_fore_df = df_fore.loc[df_fore['Well_allias'].isin(wellnames)].set_index('Well_allias')
+    well_fore_df = df_fore.loc[df_fore['Well_allias'].isin(wellnames)]\
+    .set_index('Well_allias')
     
     # Aggregate historical output for gas, water and oil for each wellname.
     output = ['Gas Prod', 'Oil Prod', 'Water Prod']
     Np_df = well_hist_df.groupby('Well_allias').sum()[output]
     
-    #### Construct dataframe of output values for each of the wells on the last day of historical data.
+    #### Construct dataframe of output values for each of the wells on the last day of 
+    # historical data.
     d1 = {}; tab = []
     
     for well in wellnames:
@@ -275,24 +270,28 @@ def cumul_time(wellnames):
         # Access the output values of the well iterate on this date.
         values = well_hist_df.loc[well].set_index('Prod Date').loc[tf]
         
-        # Append these values in a dict where key is the well_allias and value is a list of the output values.
+        # Append these values in a dict where key is the well_allias and value is a 
+        # list of the output values.
         d1[well] = [values[output][i] for i in np.arange(len(output))]
             
         # Extract the time of abandonment from the forecast data for each well.
         tab.append(len(well_hist_df.index) + len(well_fore_df.index))
     
-    # Data from of the output values on the last day of production for each input well. Indices are the well_allias
-    # and the columns are the outputs (by virtue of the transpose operation).
+    # Data from of the output values on the last day of production for each input well. 
+    # Indices are the well_alliasand the columns are the outputs (by virtue of the 
+    # transpose operation).
     qf_df = pd.DataFrame(data=d1, index=output).T
     
-    #### Run train_model() to compute parameter estimations for each well to compute q_ab and Q_f for each output.
+    #### Run train_model() to compute parameter estimations for each well to compute q_ab 
+    #### and Q_f for each output.
     
     # Initial guess for unknown parameter.
     theta_init = np.array([1000, .5, 1])
     d2sub = {}; d2 = {}; m = 0
     
-    #### Generate a dict where each key is a well allias with value a subdict, where each key of the subdict is an
-    #### output type (e.g. Gas Prod) and each key is the value of Qf corresponding to the Arps parameter values.
+    #### Generate a dict where each key is a well allias with value a subdict, where each 
+    #### key of the subdict is an output type (e.g. Gas Prod) and each key is the value 
+    #### of Qf corresponding to the Arps parameter values.
     for well in wellnames:
         
         for i in np.arange(len(output)):
@@ -301,32 +300,37 @@ def cumul_time(wellnames):
             valid_days = well_hist_df.loc[well_hist_df[output[i]] >= 0]
             t = np.linspace(1, len(valid_days), len(valid_days))
             
-            # Invoke train_model() to compute the Arps parameters for the output of this well.
-            [q_init, b_factor, decline_rate] = train_model(t, valid_days[output[i]], theta_init).x
+            # Invoke train_model() to compute the Arps parameters for the output of this 
+            # well.
+            [q_init, b_factor, decline_rate] = train_model(t, valid_days[output[i]], \
+            	theta_init).x
             
             # Compute Q_f for each output of the well iterate.
             qab = q_init/(1 + b_factor*decline_rate*tab[m])**(1/b_factor)
             qf = qf_df[output[i]].loc[well]
-            d2sub[output[i]] = q_init**b_factor/((1 - b_factor)*decline_rate)*(qf**(1 - b_factor) - \
-                                                                               qab**(1 - b_factor))
+            d2sub[output[i]] = q_init**b_factor/((1 - b_factor)*decline_rate)*\
+            (qf**(1 - b_factor) - qab**(1 - b_factor))
+                                                                               
         # Store this dict under a key for the well in a super dict.
         d2[well] = d2sub
         d2sub = {}
         m += 1
     
-    #### Use this dict to generate a dataframe for Qf, where each index is well_allias and each column is Qf for that 
-    #### output.
+    #### Use this dict to generate a dataframe for Qf, where each index is well_allias 
+    #### and each column is Qf for that output.
     Qf_data = [d2[wells] for wells in wellnames]
-    Qf_df = pd.DataFrame(data=[Qf_data[i] for i in np.arange(len(Qf_data))], index=wellnames)
+    Qf_df = pd.DataFrame(data=[Qf_data[i] for i in np.arange(len(Qf_data))], \
+    	index=wellnames)
     
-    #### Now combine Np and Qf dataframes to create EUR dataframe.
-    EUR_df = Np_df.append(Qf_df).reset_index().groupby('index').sum().rename_axis('Well_allias')
-    
-    #combine_df = Np_df.append(EUR_df)
-    #print(combine_df)
-    gas_df = pd.DataFrame({'Np': Np_df['Gas Prod'], 'EUR': EUR_df['Gas Prod']}, index=wellnames)
-    oil_df = pd.DataFrame({'Np': Np_df['Oil Prod'], 'EUR': EUR_df['Oil Prod']}, index=wellnames)
-    water_df = pd.DataFrame({'Np': Np_df['Water Prod'], 'EUR': EUR_df['Water Prod']}, index=wellnames)
+    #### Now combine Np and Qf dataframes to create EUR and subsequent output dataframes.
+    EUR_df = Np_df.append(Qf_df).reset_index().groupby('index').sum().\
+    rename_axis('Well_allias')
+    gas_df = pd.DataFrame({'Np': Np_df['Gas Prod'], 'EUR': EUR_df['Gas Prod']}, \
+    	index=wellnames)
+    oil_df = pd.DataFrame({'Np': Np_df['Oil Prod'], 'EUR': EUR_df['Oil Prod']}, \
+    	index=wellnames)
+    water_df = pd.DataFrame({'Np': Np_df['Water Prod'], 'EUR': EUR_df['Water Prod']}, \
+    	index=wellnames)
     
     #### Plotting.
     ax1 = plt.subplot(131)
@@ -350,7 +354,6 @@ def cumul_time(wellnames):
     return Np_df, EUR_df
 
 
-# wellnames = ['P003']
 wellnames = ['P001', 'P002', 'P010', 'P013']
 fig1 = plt.figure(1)
 group_wells(wellnames)
@@ -358,30 +361,11 @@ fig1.show()
 fig2 = plt.figure(2)
 monthly_prod(df)
 fig2.show()
-fig3 = plot_curves(wellnames)
+fig3 = plot_curves(['P003']) # Results for this routine are clearer with one input well
+							 # but can also be run with multiple inputs like the other
+							 # functions.
 fig3.show()
 fig4 = plt.figure(4)
 cumul_time(wellnames)
 fig4.show()
 input()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
