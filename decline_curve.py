@@ -116,7 +116,6 @@ def monthly_prod(hist):
 # MODEL FITTING #
 #################
 def model(theta, X):
-
 	"""
 	Implementation of Arp's decline curve model. The input parameter theta
 	will be learnt from the training data X and initiated with an initial
@@ -128,21 +127,17 @@ def model(theta, X):
 	return yhat
 
 def cost(theta, X, y):
-
 	"""
 	Uses the instances from the training data to tune the theta model parameter
 	using the least squares solver.
 	"""
-
 	return model(theta, X) - y
 
 def train_model(X, y, theta_init):
-
 	"""
 	Minimises the cost function in a least square sense to learn theta that
 	provides a best least squares fit of the Arp's decline curve model.
 	"""
-	
 	theta_opt = least_squares(cost, theta_init, method='lm', args=(X, y), verbose=1)
 	return theta_opt
 
@@ -158,7 +153,7 @@ def plot_curves(wellnames=None):
     # Preliminaries.
 	output = ['Gas Prod', 'Oil Prod', 'Water Prod']
 	colors = ['cornflowerblue', 'forestgreen', 'darkorchid']
-	fig3, axs = plt.subplots(2, 3, num=3)
+	fig3, axs = plt.subplots(2, 3, num=3, figsize=(8, 6))
 	plt.tight_layout()
 	fig3.subplots_adjust(wspace=.3, hspace=.1)
 
@@ -230,8 +225,7 @@ def plot_curves(wellnames=None):
 				' (top) and error (below) vs. time', fontdict={'fontsize': 11})
 	return fig3
 
-def cumul_time(wellnames):
-    
+def cumul_time(wellnames): 
     """ 
 	N_p = cumulative production based on the recorded data.
 	EUR = ultimate recoverable volume.
@@ -355,17 +349,17 @@ def cumul_time(wellnames):
 
 
 wellnames = ['P001', 'P002', 'P010', 'P013']
-fig1 = plt.figure(1)
+fig1 = plt.figure(1, figsize=(8, 6))
 group_wells(wellnames)
 fig1.show()
-fig2 = plt.figure(2)
+fig2 = plt.figure(2, figsize=(8, 6))
 monthly_prod(df)
 fig2.show()
 fig3 = plot_curves(['P003']) # Results for this routine are clearer with one input well
 							 # but can also be run with multiple inputs like the other
 							 # functions.
 fig3.show()
-fig4 = plt.figure(4)
+fig4 = plt.figure(4, figsize=(8, 6))
 cumul_time(wellnames)
 fig4.show()
 input()
